@@ -1,0 +1,245 @@
+import React, { useState } from 'react';
+import { useNexus, Department } from '../../context/NexusContext';
+import { Link, useNavigate } from 'react-router';
+import { 
+  Upload, 
+  CreditCard, 
+  WalletCards, 
+  FileText, 
+  ChevronRight,
+  Clock,
+  ArrowRight,
+  Award,
+  X
+} from 'lucide-react';
+import { format } from 'date-fns';
+
+export function Dashboard() {
+  const { profile, departments, notifications } = useNexus();
+  const navigate = useNavigate();
+  const [selectedDept, setSelectedDept] = useState<Department | null>(null);
+
+  const clearedCount = departments.filter(d => d.status === 'Cleared').length;
+  const totalCount = departments.length;
+  const allCleared = clearedCount === totalCount;
+  const progressPercent = Math.round((clearedCount / totalCount) * 100);
+
+  const getStatusColor = (status: string) => {
+    switch(status) {
+      case 'Cleared': return 'bg-[#1040C0] text-white';
+      case 'Pending': return 'bg-[#F0C020] text-[#121212]';
+      case 'Action Required': return 'bg-[#D02020] text-white';
+      default: return 'bg-[#E0E0E0] text-[#121212]';
+    }
+  };
+
+  const getStatusDot = (status: string) => {
+    switch(status) {
+      case 'Cleared': return 'bg-[#1040C0]';
+      case 'Pending': return 'bg-[#F0C020]';
+      case 'Action Required': return 'bg-[#D02020]';
+      default: return 'bg-[#121212]';
+    }
+  };
+
+  return (
+    <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-10 relative">
+      {/* Detail Slide-in Panel */}
+      {selectedDept && (
+        <div className="fixed inset-y-0 right-0 w-full md:w-96 bg-white border-l-4 border-[#121212] shadow-[-8px_0px_0px_0px_rgba(0,0,0,0.1)] z-50 transform transition-transform p-6 flex flex-col">
+          <div className="flex justify-between items-center mb-8 border-b-4 border-[#121212] pb-4">
+            <h3 className="font-black text-2xl uppercase tracking-tight">{selectedDept.name} Detail</h3>
+            <button onClick={() => setSelectedDept(null)} className="hover:bg-[#F0F0F0] p-2 border-2 border-transparent hover:border-[#121212] transition-colors rounded">
+              <X className="w-6 h-6" strokeWidth={3} />
+            </button>
+          </div>
+          
+          <div className="space-y-6 flex-1">
+            <div>
+              <p className="font-bold text-xs uppercase tracking-widest opacity-60 mb-1">Status</p>
+              <div className={`inline-flex items-center gap-2 px-3 py-1 font-bold text-sm uppercase tracking-wider border-2 border-[#121212] ${getStatusColor(selectedDept.status)}`}>
+                <span className={`w-2 h-2 rounded-full bg-white`}></span>
+                {selectedDept.status}
+              </div>
+            </div>
+            
+            <div>
+              <p className="font-bold text-xs uppercase tracking-widest opacity-60 mb-1">Authority</p>
+              <p className="font-bold text-lg">{selectedDept.authority}</p>
+            </div>
+
+            <div className="p-4 border-2 border-[#121212] bg-[#F0F0F0]">
+              <p className="font-bold text-xs uppercase tracking-widest mb-2">Note from Authority</p>
+              <p className="font-medium text-[#121212] leading-relaxed">"{selectedDept.note}"</p>
+            </div>
+
+            <div>
+              <p className="font-bold text-xs uppercase tracking-widest opacity-60 mb-2">Suggested Action</p>
+              {selectedDept.status === 'Action Required' && selectedDept.name === 'Library' && (
+                <button onClick={() => { setSelectedDept(null); navigate('/payments'); }} className="w-full py-4 px-6 bg-[#D02020] text-white border-4 border-[#121212] font-black uppercase text-sm flex items-center justify-between hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_#121212] transition-all">
+                  <span>Pay Fine</span>
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              )}
+              {selectedDept.status === 'Action Required' && selectedDept.name === 'Hostel' && (
+                <button onClick={() => { setSelectedDept(null); navigate('/payments'); }} className="w-full py-4 px-6 bg-[#D02020] text-white border-4 border-[#121212] font-black uppercase text-sm flex items-center justify-between hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_#121212] transition-all">
+                  <span>Pay Repair Dues</span>
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              )}
+              {selectedDept.status === 'Pending' && (
+                <p className="text-sm italic font-medium opacity-70">No action needed. Awaiting authority sign-off.</p>
+              )}
+              {selectedDept.status === 'Cleared' && (
+                <p className="text-sm italic font-medium text-[#1040C0]">Department successfully cleared.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Dimmed Background Overlay when panel open */}
+      {selectedDept && (
+        <div className="fixed inset-0 bg-black/20 z-40 lg:hidden" onClick={() => setSelectedDept(null)} />
+      )}
+
+      {/* Welcome Banner */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="font-black text-3xl md:text-5xl tracking-tight mb-2 uppercase">
+            Welcome back, {profile.name.split(' ')[0]} 👋
+          </h1>
+          <p className="text-lg font-medium opacity-80">
+            {format(new Date(), 'EEEE, MMMM do, yyyy')} • Your graduation clearance is in progress.
+          </p>
+        </div>
+      </div>
+
+      {allCleared && (
+        <div className="w-full bg-[#1040C0] text-white border-4 border-[#121212] p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[8px_8px_0px_0px_#121212]">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 bg-[#F0C020] border-4 border-[#121212] rounded-full flex items-center justify-center flex-shrink-0">
+              <Award className="w-8 h-8 text-[#121212]" strokeWidth={2.5} />
+            </div>
+            <div>
+              <h2 className="font-black text-2xl uppercase tracking-tight">🎓 All departments cleared!</h2>
+              <p className="font-medium mt-1">Your Digital No-Dues Certificate is ready to download.</p>
+            </div>
+          </div>
+          <Link to="/locker" className="shrink-0">
+            <button className="bg-[#F0C020] text-[#121212] px-8 py-4 border-4 border-[#121212] font-black uppercase tracking-wider hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_#121212] transition-all">
+              Download Certificate
+            </button>
+          </Link>
+        </div>
+      )}
+
+      {/* Progress Bar */}
+      <div className="bg-white p-6 md:p-8 border-4 border-[#121212] shadow-[4px_4px_0px_0px_#121212]">
+        <div className="flex items-center justify-between mb-4">
+          <p className="font-black uppercase text-xl md:text-2xl tracking-tight">
+            {clearedCount} of {totalCount} departments cleared
+          </p>
+          <span className="font-black text-3xl text-[#1040C0]">{progressPercent}%</span>
+        </div>
+        <div className="h-8 md:h-10 w-full bg-[#E0E0E0] border-4 border-[#121212] relative overflow-hidden">
+          <div 
+            className="h-full bg-[#1040C0] border-r-4 border-[#121212] transition-all duration-1000 ease-out" 
+            style={{ width: `${progressPercent}%` }} 
+          />
+        </div>
+      </div>
+
+      {/* Grid Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-10">
+        
+        {/* Heatmap & Quick Actions */}
+        <div className="lg:col-span-2 space-y-10">
+          <div>
+            <h2 className="font-black text-2xl uppercase mb-6 tracking-tight flex items-center gap-2">
+              <span className="w-4 h-4 bg-[#D02020] inline-block border-2 border-[#121212]" />
+              Status Heatmap
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {departments.map((dept) => (
+                <div 
+                  key={dept.id}
+                  onClick={() => setSelectedDept(dept)}
+                  className="bg-white border-2 border-[#121212] hover:border-4 hover:shadow-[4px_4px_0px_0px_#121212] transition-all cursor-pointer p-5 flex flex-col justify-between min-h-[140px]"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="font-black text-xl uppercase tracking-tight">{dept.name}</h3>
+                      <p className="text-xs font-bold uppercase opacity-60 tracking-widest mt-1">{dept.authority}</p>
+                    </div>
+                    <div className="w-8 h-8 rounded-full border-2 border-[#121212] flex items-center justify-center shrink-0">
+                       <ChevronRight className="w-5 h-5 opacity-50" />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div className={`inline-flex items-center gap-2 px-2 py-0.5 border-2 border-[#121212] mb-2 font-bold text-[10px] uppercase tracking-wider ${getStatusColor(dept.status)}`}>
+                        {dept.status}
+                    </div>
+                    <p className="text-sm font-medium line-clamp-1 opacity-80" title={dept.note}>{dept.note}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h2 className="font-black text-2xl uppercase mb-6 tracking-tight flex items-center gap-2">
+              <span className="w-4 h-4 bg-[#F0C020] inline-block border-2 border-[#121212]" />
+              Quick Actions
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { title: 'Upload Docs', icon: Upload, path: '/documents', color: 'bg-white' },
+                { title: 'Pay Dues', icon: CreditCard, path: '/payments', color: 'bg-[#F0C020]' },
+                { title: 'Safe Locker', icon: WalletCards, path: '/locker', color: 'bg-[#1040C0] text-white' },
+                { title: 'Track Status', icon: FileText, path: '/application', color: 'bg-white' },
+              ].map((action, i) => (
+                <Link key={i} to={action.path}>
+                  <div className={`aspect-square border-4 border-[#121212] ${action.color} flex flex-col items-center justify-center p-4 hover:translate-y-[-4px] hover:shadow-[4px_4px_0px_0px_#121212] transition-all text-center`}>
+                    <action.icon className="w-8 h-8 mb-3" strokeWidth={2.5} />
+                    <span className="font-black text-sm uppercase tracking-wide leading-tight">{action.title}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="lg:col-span-1">
+          <div className="bg-white border-4 border-[#121212] h-full shadow-[4px_4px_0px_0px_#121212]">
+            <div className="bg-[#121212] text-white p-5 border-b-4 border-[#121212]">
+              <h2 className="font-black text-xl uppercase tracking-tight">Recent Activity</h2>
+            </div>
+            <div className="p-6">
+              <div className="relative border-l-4 border-[#E0E0E0] ml-4 md:ml-6 space-y-8">
+                {notifications.slice(0, 5).map((noti, i) => (
+                  <div key={noti.id} className="relative pl-6 md:pl-8">
+                    <div className={`absolute -left-[14px] top-1 w-6 h-6 rounded-full border-4 border-[#121212] ${
+                      noti.type === 'approval' ? 'bg-[#1040C0]' :
+                      noti.type === 'rejection' ? 'bg-[#D02020]' :
+                      noti.type === 'payment' ? 'bg-[#F0C020]' : 'bg-white'
+                    }`} />
+                    <p className="font-bold text-xs text-gray-500 uppercase tracking-widest flex items-center gap-1 mb-1">
+                      <Clock className="w-3 h-3" />
+                      {noti.time}
+                    </p>
+                    <p className="font-bold text-md leading-tight mb-1 text-[#121212]">{noti.title}</p>
+                    <p className="text-sm font-medium opacity-80">{noti.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
