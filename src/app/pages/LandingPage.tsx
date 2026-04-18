@@ -18,6 +18,7 @@ import { BauhausButton } from '../components/BauhausButton';
 import { StepCard } from '../components/StepCard';
 import { FeatureCard } from '../components/FeatureCard';
 import { PaymentCard } from '../components/PaymentCard';
+import { useNavigate } from 'react-router';
 
 export default function LandingPage() {
   return (
@@ -36,6 +37,7 @@ export default function LandingPage() {
 }
 
 function HeroSection() {
+  const navigate = useNavigate();
   return (
     <section className="min-h-screen flex border-b-4 border-[#121212]">
       <div className="w-full lg:w-[55%] bg-white border-r-4 border-[#121212] flex flex-col">
@@ -51,7 +53,7 @@ function HeroSection() {
             <a href="#" className="font-bold uppercase text-sm hover:text-[#D02020]">
               About
             </a>
-            <BauhausButton variant="red">Get Started</BauhausButton>
+            <BauhausButton variant="red" onClick={() => navigate('/login')}>Get Started</BauhausButton>
           </div>
         </nav>
 
@@ -86,7 +88,7 @@ function HeroSection() {
           </div>
 
           <div className="flex flex-wrap gap-4">
-            <BauhausButton variant="red">GET STARTED →</BauhausButton>
+            <BauhausButton variant="red" onClick={() => navigate('/login')}>GET STARTED →</BauhausButton>
             <BauhausButton variant="outline">SEE HOW IT WORKS</BauhausButton>
           </div>
         </div>
@@ -487,6 +489,7 @@ function QRVerification() {
 }
 
 function FinalCTA() {
+  const navigate = useNavigate();
   return (
     <section className="bg-[#F0C020] border-b-4 border-[#121212] py-24 relative overflow-hidden">
       <div
@@ -510,7 +513,7 @@ function FinalCTA() {
         </p>
 
         <div className="flex flex-wrap justify-center gap-4">
-          <BauhausButton variant="red">APPLY FOR CLEARANCE →</BauhausButton>
+          <BauhausButton variant="red" onClick={() => navigate('/login')}>APPLY FOR CLEARANCE →</BauhausButton>
           <BauhausButton variant="outline">LEARN MORE</BauhausButton>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router';
 import LandingPage from './pages/LandingPage';
+import { AuthPage } from './pages/AuthPage';
 import { NexusProvider } from './context/NexusContext';
 
 // Placeholders for now, will create real implementations soon
@@ -17,6 +18,7 @@ export default function App() {
     <NexusProvider>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<AuthPage />} />
         <Route element={<StudentLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/application" element={<MyApplication />} />
