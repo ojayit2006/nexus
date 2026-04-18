@@ -1,8 +1,16 @@
 import React, { useState } from 'react';
 import { useLab } from '../../context/LabContext';
 import { format } from 'date-fns';
-import { CheckCircle2, AlertCircle, Eye, RotateCcw } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router';
+
+// Safe date formatter — never throws on null/undefined/invalid dates
+const safeFormat = (dateVal: string | null | undefined, fmt: string): string => {
+  if (!dateVal) return '—';
+  const d = new Date(dateVal);
+  if (isNaN(d.getTime())) return '—';
+  return format(d, fmt);
+};
 
 export function ReviewedApplications() {
   const { labStudents, undoDecision } = useLab();
@@ -11,9 +19,13 @@ export function ReviewedApplications() {
   const [activeTab, setActiveTab] = useState<'All' | 'Approved' | 'Flagged'>('All');
   
   const reviewedList = labStudents.filter(s => s.status !== 'Pending');
-  const displayList = reviewedList.filter(s => activeTab === 'All' ? true : s.status === activeTab).sort((a,b) => {
-    return new Date(b.decisionDate || '').getTime() - new Date(a.decisionDate || '').getTime();
-  });
+  const displayList = reviewedList
+    .filter(s => activeTab === 'All' ? true : s.status === activeTab)
+    .sort((a, b) => {
+      const aTime = a.decisionDate ? new Date(a.decisionDate).getTime() : 0;
+      const bTime = b.decisionDate ? new Date(b.decisionDate).getTime() : 0;
+      return bTime - aTime;
+    });
 
   return (
     <div className="p-6 md:p-10 max-w-[1600px] mx-auto space-y-8 pb-32">
@@ -52,7 +64,8 @@ export function ReviewedApplications() {
             </thead>
             <tbody className="divide-y-2 divide-[#121212]">
               {displayList.map(s => {
-                 const isWithin24H = (new Date().getTime() - new Date(s.decisionDate || '').getTime()) < (24 * 60 * 60 * 1000);
+                 const decisionTs = s.decisionDate ? new Date(s.decisionDate).getTime() : 0;
+                 const isWithin24H = decisionTs > 0 && (new Date().getTime() - decisionTs) < (24 * 60 * 60 * 1000);
 
                  return (
                    <tr key={s.id} className="hover:bg-[#F9F9F9]">
@@ -69,8 +82,8 @@ export function ReviewedApplications() {
                          )}
                       </td>
                       <td className="p-4 opacity-80 uppercase tracking-widest text-[10px]">
-                         {format(new Date(s.decisionDate || ''), 'MMM dd, yyyy')}<br/>
-                         <span className="opacity-60">{format(new Date(s.decisionDate || ''), 'HH:mm')}</span>
+                         {safeFormat(s.decisionDate, 'MMM dd, yyyy')}<br/>
+                         <span className="opacity-60">{safeFormat(s.decisionDate, 'HH:mm')}</span>
                       </td>
                       <td className="p-4 max-w-[200px] align-top">
                          <div className="line-clamp-2 text-[10px] opacity-80 font-medium">
