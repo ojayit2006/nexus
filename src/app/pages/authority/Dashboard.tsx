@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuthority } from '../../context/AuthorityContext';
-import { Link } from 'react-router'; // Wait, it's 'react-router'
+import { useAuth } from '../../context/AuthContext';
+import { Link } from 'react-router'; 
 import { 
   Clock, CheckCircle, AlertTriangle, ChevronRight, 
   Activity, ArrowUpRight
@@ -9,6 +10,8 @@ import { format } from 'date-fns';
 
 export function Dashboard() {
   const { profile, pendingApps, reviewedApps } = useAuthority();
+  const { currentUser } = useAuth();
+  const basePath = `/${currentUser?.role === 'principal' ? 'principal' : 'hod'}`;
 
   const totalPending = pendingApps.length;
   // Let's pretend anything solved today checks the date. Since mock data generates right now we can just assume 5:
@@ -41,7 +44,7 @@ export function Dashboard() {
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between border-b-4 border-[#121212] pb-4">
              <h3 className="font-black text-2xl uppercase tracking-tight">Priority Queue</h3>
-             <Link to="/authority/pending" className="font-bold text-xs uppercase tracking-widest text-[#1040C0] hover:underline flex items-center gap-1">
+             <Link to={`${basePath}/pending`} className="font-bold text-xs uppercase tracking-widest text-[#1040C0] hover:underline flex items-center gap-1">
                View All <ArrowUpRight className="w-4 h-4" />
              </Link>
           </div>
@@ -65,7 +68,7 @@ export function Dashboard() {
                    </div>
                    
                    <Link 
-                     to={`/authority/review/${app.id}`}
+                     to={`${basePath}/review/${app.id}`}
                      className="shrink-0 px-6 py-3 bg-[#121212] text-white font-black uppercase text-xs tracking-widest text-center hover:bg-[#1040C0] transition-colors flex items-center justify-center gap-2"
                    >
                      Review <ChevronRight className="w-4 h-4" />

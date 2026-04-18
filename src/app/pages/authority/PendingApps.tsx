@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuthority } from '../../context/AuthorityContext';
+import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router';
 import { format } from 'date-fns';
 import { 
@@ -10,6 +11,9 @@ import { motion, AnimatePresence } from 'motion/react';
 
 export function PendingApps() {
   const { pendingApps, approveApplication, flagApplication, batchAction } = useAuthority();
+  const { currentUser } = useAuth();
+  const basePath = `/${currentUser?.role === 'principal' ? 'principal' : 'hod'}`;
+  
   const [selected, setSelected] = useState<string[]>([]);
   const [search, setSearch] = useState('');
   
@@ -121,7 +125,7 @@ export function PendingApps() {
                      <Zap className="w-4 h-4" /> Quick Approve
                    </button>
                    <Link 
-                     to={`/authority/review/${app.id}`}
+                     to={`${basePath}/review/${app.id}`}
                      className="flex-1 lg:flex-none px-8 py-4 bg-[#121212] text-white border-2 border-[#121212] font-black uppercase text-xs tracking-widest hover:bg-[#F0C020] hover:text-[#121212] hover:border-[#F0C020] transition-colors text-center"
                    >
                      Review Detail

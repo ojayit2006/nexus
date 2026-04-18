@@ -29,13 +29,15 @@ export function AuthorityLayout() {
     return '';
   };
 
+  const basePath = `/${currentUser?.role === 'principal' ? 'principal' : 'hod'}`;
+
   const navLinks = [
-    { name: 'Dashboard', path: '/authority/dashboard', icon: <LayoutDashboard size={20} /> },
-    { name: 'Pending Applications', path: '/authority/pending', icon: <Inbox size={20} /> },
-    { name: 'Reviewed Applications', path: '/authority/reviewed', icon: <CheckSquare size={20} /> },
-    { name: 'Notifications', path: '/authority/notifications', icon: <Bell size={20} /> },
-    { name: 'Department Reports', path: '/authority/reports', icon: <FileBarChart size={20} /> },
-    { name: 'Help', path: '/authority/help', icon: <HelpCircle size={20} /> },
+    { name: 'Dashboard', path: `${basePath}/dashboard`, icon: <LayoutDashboard size={20} /> },
+    { name: 'Pending Applications', path: `${basePath}/pending`, icon: <Inbox size={20} /> },
+    { name: 'Reviewed Applications', path: `${basePath}/reviewed`, icon: <CheckSquare size={20} /> },
+    { name: 'Notifications', path: `${basePath}/notifications`, icon: <Bell size={20} /> },
+    { name: 'Department Reports', path: `${basePath}/reports`, icon: <FileBarChart size={20} /> },
+    { name: 'Help', path: `${basePath}/help`, icon: <HelpCircle size={20} /> },
   ];
 
   const handleLogout = () => {
@@ -132,7 +134,7 @@ export function AuthorityLayout() {
           </div>
 
           <div className="flex items-center gap-4 lg:gap-8">
-            <button className="relative p-2 text-[#121212] hover:bg-[#F0F0F0] rounded-full transition-colors" onClick={() => navigate('/authority/notifications')}>
+            <button className="relative p-2 text-[#121212] hover:bg-[#F0F0F0] rounded-full transition-colors" onClick={() => navigate(`${basePath}/notifications`)}>
               <Bell size={24} />
               {unreadCount > 0 && (
                 <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-[#D02020] rounded-full border-2 border-white" />

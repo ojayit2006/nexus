@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router';
 import { useAuthority } from '../../context/AuthorityContext';
+import { useAuth } from '../../context/AuthContext';
 import { format } from 'date-fns';
 import { 
   ChevronRight, ArrowLeft, CheckCircle2, AlertOctagon,
@@ -12,6 +13,8 @@ export function ReviewApp() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { pendingApps, reviewedApps, approveApplication, flagApplication, toggleDocumentVerification } = useAuthority();
+  const { currentUser } = useAuth();
+  const basePath = `/${currentUser?.role === 'principal' ? 'principal' : 'hod'}`;
 
   const application = pendingApps.find(a => a.id === id) || reviewedApps.find(a => a.id === id);
   
@@ -43,7 +46,7 @@ export function ReviewApp() {
     });
 
     setTimeout(() => {
-      navigate('/authority/pending');
+      navigate(`${basePath}/pending`);
     }, 2000);
   };
 
@@ -67,9 +70,9 @@ export function ReviewApp() {
 
       {/* Breadcrumb */}
       <div className="font-bold text-[10px] uppercase tracking-widest opacity-60 flex items-center gap-2 mb-2">
-        <Link to="/authority/dashboard" className="hover:underline hover:text-[#1040C0]">Dashboard</Link>
+        <Link to={`${basePath}/dashboard`} className="hover:underline hover:text-[#1040C0]">Dashboard</Link>
         <ChevronRight className="w-3 h-3" />
-        <Link to="/authority/pending" className="hover:underline hover:text-[#1040C0]">Pending</Link>
+        <Link to={`${basePath}/pending`} className="hover:underline hover:text-[#1040C0]">Pending</Link>
         <ChevronRight className="w-3 h-3" />
         <span className="text-[#121212]">Review {application.studentName}</span>
       </div>

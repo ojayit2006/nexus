@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { 
   ArrowLeft, FileText, CheckCircle2, 
   AlertCircle, Download, FileBadge, ArrowRight,
-  ClipboardCheck
+  ClipboardCheck, Clock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 

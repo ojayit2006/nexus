@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuthority } from '../../context/AuthorityContext';
+import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router';
 import { format, differenceInHours } from 'date-fns';
 import { 
@@ -10,6 +11,9 @@ import { motion, AnimatePresence } from 'motion/react';
 
 export function ReviewedApps() {
   const { reviewedApps, undoDecision } = useAuthority();
+  const { currentUser } = useAuth();
+  const basePath = `/${currentUser?.role === 'principal' ? 'principal' : 'hod'}`;
+  
   const [activeTab, setActiveTab] = useState<'All'|'Approved'|'Rejected'>('All');
   const [search, setSearch] = useState('');
   const [undoModal, setUndoModal] = useState<string | null>(null);
@@ -117,7 +121,7 @@ export function ReviewedApps() {
                               <button onClick={() => alert('Summary PDF downloaded.')} className="w-10 h-10 border-2 border-[#121212] flex items-center justify-center hover:bg-[#121212] hover:text-white transition-colors" title="Download Summary">
                                  <Download className="w-4 h-4" />
                               </button>
-                              <Link to={`/authority/review/${app.id}`} className="w-10 h-10 border-2 border-[#121212] flex items-center justify-center hover:bg-[#121212] hover:text-white transition-colors" title="View Details">
+                              <Link to={`${basePath}/review/${app.id}`} className="w-10 h-10 border-2 border-[#121212] flex items-center justify-center hover:bg-[#121212] hover:text-white transition-colors" title="View Details">
                                  <ExternalLink className="w-4 h-4" />
                               </Link>
                               <button 
