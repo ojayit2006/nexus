@@ -8,7 +8,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 
 export function StudentManagement() {
-  const { students, toggleStudentBlock } = useAdmin();
+  const { students, toggleStudentBlock, addStudent } = useAdmin();
   const { addUser } = useAuth();
   
   const [search, setSearch] = useState('');
@@ -36,14 +36,22 @@ export function StudentManagement() {
   const handleCreateStudent = (e: React.FormEvent) => {
     e.preventDefault();
     if(formData.name && formData.email && formData.pass) {
-      addUser({
+      
+      const newAuthData = {
         id: `s_${Date.now()}`,
         email: formData.email,
         password: formData.pass,
-        role: 'student',
+        role: 'student' as any,
         name: formData.name,
         redirectTo: '/dashboard'
-      });
+      };
+
+      // 1. Give them system-level login access
+      addUser(newAuthData);
+
+      // 2. Insert them into the Admin's frontend display table
+      addStudent(formData);
+
       setModalOpen(false);
       setFormData({ name: '', enum: '', branch: 'CSE', year: '2025', phone: '', email: '', pass: '' });
       triggerToast('Student account created. Credentials sent to registered email.');

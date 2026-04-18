@@ -76,6 +76,7 @@ interface AdminState {
   updateSettingsToggle: (key: keyof Omit<SystemSettings, 'pipelineOrder'|'templates'>) => void;
   updatePipelineOrder: (order: string[]) => void;
   addAuthority: (auth: any) => void;
+  addStudent: (stu: any) => void;
   addCsvUpload: (csv: any) => void;
 }
 
@@ -94,7 +95,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     { id: 'hos', name: 'Hostel', authority: 'Warden', status: isCleared ? 'Cleared' : 'Pending' as DeptStatus, lastUpdated: subDays(new Date(), 6).toISOString() }
   ];
 
-  const [students, setStudents] = useState<AdminStudent[]>([
+  const defaultStudents: AdminStudent[] = [
     {
       id: 'STU-001', name: 'Hritani Joshi', rollNo: '21CS088', branch: 'CSE', batch: '2025', email: 'hritani.joshi@college.edu', phone: '+91 9876543210', enrollmentDate: '2021-08-15',
       isBlocked: false, departments: getMockDepartments(true), adminNotes: '', certStatus: 'Ready to Issue',
@@ -131,13 +132,29 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       id: 'STU-008', name: 'Karan Malhotra', rollNo: '21CS028', branch: 'Mechanical', batch: '2025', email: 'karan.m@college.edu', phone: '+91 9876541133', enrollmentDate: '2021-08-15',
       isBlocked: false, departments: getMockDepartments(false), adminNotes: '', certStatus: 'Not Ready', documents: [], payments: []
     }
-  ]);
+  ];
 
-  const [authorities, setAuthorities] = useState<AuthorityNode[]>([
+  const [students, setStudents] = useState<AdminStudent[]>(() => {
+    const saved = localStorage.getItem('nexus_admin_students');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (error) { console.error("Parse error:", error); }
+    }
+    return defaultStudents;
+  });
+
+  const defaultAuthorities: AuthorityNode[] = [
     { id: 'AUTH-1', name: 'Prof. Anita Sharma', role: 'HOD', department: 'Computer Science', email: 'anita.sharma@nexus.edu', joined: '2020-04-10', pendingCount: 15, reviewedCount: 300, avgTimeDays: 1.4, isOnline: true },
     { id: 'AUTH-2', name: 'Dr. Mehta', role: 'Lab In-charge', department: 'Computer Science', email: 'mehta@nexus.edu', joined: '2019-01-15', pendingCount: 42, reviewedCount: 890, avgTimeDays: 2.1, isOnline: false },
     { id: 'AUTH-3', name: 'The Principal', role: 'Principal', department: 'Super Admin', email: 'principal@nexus.edu', joined: '2015-08-01', pendingCount: 5, reviewedCount: 4000, avgTimeDays: 0.5, isOnline: true }
-  ]);
+  ];
+
+  const [authorities, setAuthorities] = useState<AuthorityNode[]>(() => {
+    const saved = localStorage.getItem('nexus_admin_authorities');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (error) { console.error("Parse error:", error); }
+    }
+    return defaultAuthorities;
+  });
 
   const [settings, setSettings] = useState<SystemSettings>({
     databaseOnline: true,
@@ -199,7 +216,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateSettingsToggle = (key: keyof Omit<SystemSettings, 'pipelineOrder'|'templates'>) => {
-    setSettings(prev => ({ ...prev, [key]: !prev[key as any] }));
+    setSettings(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] } as SystemSettings));
   };
 
   const updatePipelineOrder = (order: string[]) => {
@@ -219,7 +236,35 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       avgTimeDays: 0,
       isOnline: false
     };
-    setAuthorities(prev => [...prev, newAuth]);
+    setAuthorities(prev => {
+      const updated = [...prev, newAuth];
+      localStorage.setItem('nexus_admin_authorities', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const addStudent = (stu: any) => {
+    const newStudent: AdminStudent = {
+      id: `STU-${Math.floor(Math.random()*1000)}`,
+      name: stu.name,
+      rollNo: stu.enum || `R-${Math.floor(Math.random()*1000)}`,
+      branch: stu.branch || 'CSE',
+      batch: stu.batch || '2025',
+      email: stu.email,
+      phone: stu.phone || '+91 0000000000',
+      enrollmentDate: new Date().toISOString(),
+      isBlocked: false,
+      departments: getMockDepartments(false),
+      adminNotes: '',
+      certStatus: 'Not Ready',
+      documents: [],
+      payments: []
+    };
+    setStudents(prev => {
+      const updated = [newStudent, ...prev];
+      localStorage.setItem('nexus_admin_students', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const addCsvUpload = (csv: any) => {
@@ -238,7 +283,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     <AdminContext.Provider value={{
       profile, students, authorities, settings, csvHistory, notifications,
       toggleStudentBlock, overrideDepartmentStatus, updateAdminNotes,
-      issueCertificate, updateSettingsToggle, updatePipelineOrder, addAuthority, addCsvUpload
+      issueCertificate, updateSettingsToggle, updatePipelineOrder, addAuthority, addStudent, addCsvUpload
     }}>
       {children}
     </AdminContext.Provider>

@@ -13,7 +13,17 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [currentUser, setCurrentUser] = useState<MockUser | null>(null);
-  const [users, setUsers] = useState<MockUser[]>(MOCK_USERS);
+  const [users, setUsers] = useState<MockUser[]>(() => {
+    const saved = localStorage.getItem('nexus_mock_users');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return MOCK_USERS;
+      }
+    }
+    return MOCK_USERS;
+  });
 
   const login = (email: string, password: string) => {
     const user = users.find(u => u.email === email && u.password === password);
@@ -29,7 +39,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addUser = (user: MockUser) => {
-    setUsers(prev => [...prev, user]);
+    setUsers(prev => {
+      const newUsers = [...prev, user];
+      localStorage.setItem('nexus_mock_users', JSON.stringify(newUsers));
+      return newUsers;
+    });
   };
 
   return (
