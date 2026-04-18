@@ -131,12 +131,14 @@ export function DocumentVerifyPage({ stage, portalPrefix }: Props) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const token = localStorage.getItem('nexus_token');
-  const headers = { Authorization: `Bearer ${token}` };
+  // Always read the token fresh — avoids stale closure 401s
+  const getAuthHeaders = () => ({
+    Authorization: `Bearer ${localStorage.getItem('nexus_token')}`,
+  });
 
   const fetchDocument = useCallback(async () => {
     try {
-      const { data } = await axios.get(`/api/documents/${documentId}/history`, { headers });
+      const { data } = await axios.get(`/api/documents/${documentId}/history`, { headers: getAuthHeaders() });
       setDoc(data.document);
       setHistory(data.history || []);
       setVerificationPath(data.verificationPath || []);
@@ -159,7 +161,7 @@ export function DocumentVerifyPage({ stage, portalPrefix }: Props) {
   const handleApprove = async () => {
     setError(''); setSubmitting(true);
     try {
-      await axios.post(`/api/documents/${documentId}/approve`, { comment }, { headers });
+      await axios.post(`/api/documents/${documentId}/approve`, { comment }, { headers: getAuthHeaders() });
       setSuccess('Document approved successfully.');
       setTimeout(() => navigate(`${portalPrefix}/pending`), 1500);
     } catch (e: any) {
@@ -171,7 +173,7 @@ export function DocumentVerifyPage({ stage, portalPrefix }: Props) {
     if (!requestedChanges.trim()) { setError('Please specify what changes are required.'); return; }
     setError(''); setSubmitting(true);
     try {
-      await axios.post(`/api/documents/${documentId}/reject`, { comment, requestedChanges }, { headers });
+      await axios.post(`/api/documents/${documentId}/reject`, { comment, requestedChanges }, { headers: getAuthHeaders() });
       setSuccess('Document rejected. Student has been notified.');
       setTimeout(() => navigate(`${portalPrefix}/pending`), 1500);
     } catch (e: any) {
