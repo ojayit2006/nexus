@@ -1,0 +1,286 @@
+{
+	"info": {
+		"_postman_id": "nexus-antigravity-api-collection",
+		"name": "Antigravity API",
+		"description": "Unified API collection for Nexus Clearance platform.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "HEALTH",
+			"item": [
+				{
+					"name": "Get Health Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/health",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "health"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "AUTH",
+			"item": [
+				{
+					"name": "Login (Student)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.token) {",
+									"    pm.environment.set(\"STUDENT_TOKEN\", jsonData.data.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"uid\": \"2022300067\",\n    \"password\": \"2022300067\"\n}",
+							"options": {
+								"raw": { "language": "json" }
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/auth/login",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Login (Lab Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.token) {",
+									"    pm.environment.set(\"LAB_TOKEN\", jsonData.data.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"uid\": \"LAB_ADMIN_UID\",\n    \"password\": \"LAB_ADMIN_UID\"\n}",
+							"options": {
+								"raw": { "language": "json" }
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/auth/login",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Get Me (Profile)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{ "key": "token", "value": "{{STUDENT_TOKEN}}", "type": "string" }]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/students/me",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "students", "me"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "APPLICATIONS (Student)",
+			"item": [
+				{
+					"name": "Submit Application",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.success && jsonData.data.application) {",
+									"    pm.environment.set(\"APPLICATION_ID\", jsonData.data.application.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{ "key": "token", "value": "{{STUDENT_TOKEN}}", "type": "string" }]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/applications/submit",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "applications", "submit"]
+						}
+					}
+				},
+				{
+					"name": "My Application Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{ "key": "token", "value": "{{STUDENT_TOKEN}}", "type": "string" }]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/applications/my-status",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "applications", "my-status"]
+						}
+					}
+				},
+				{
+					"name": "My History",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{ "key": "token", "value": "{{STUDENT_TOKEN}}", "type": "string" }]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/applications/history",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "applications", "history"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "ADMIN (Approval Workflow)",
+			"item": [
+				{
+					"name": "Lab Queue",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{ "key": "token", "value": "{{LAB_TOKEN}}", "type": "string" }]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/admin/queue?page=1&limit=20",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "admin", "queue"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "20" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Approve Application",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{ "key": "token", "value": "{{LAB_TOKEN}}", "type": "string" }]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/admin/applications/{{APPLICATION_ID}}/approve",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "admin", "applications", "{{APPLICATION_ID}}", "approve"]
+						}
+					}
+				},
+				{
+					"name": "Reject Application",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{ "key": "token", "value": "{{LAB_TOKEN}}", "type": "string" }]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"reason\": \"Lab equipment not returned\"\n}",
+							"options": {
+								"raw": { "language": "json" }
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/api/admin/applications/{{APPLICATION_ID}}/reject",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "admin", "applications", "{{APPLICATION_ID}}", "reject"]
+						}
+					}
+				},
+				{
+					"name": "Get Stats",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{ "key": "token", "value": "{{LAB_TOKEN}}", "type": "string" }]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/admin/stats",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "admin", "stats"]
+						}
+					}
+				},
+				{
+					"name": "Search Student",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{ "key": "token", "value": "{{LAB_TOKEN}}", "type": "string" }]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/api/admin/search?uid=2022300067",
+							"host": ["{{BASE_URL}}"],
+							"path": ["api", "admin", "search"],
+							"query": [{ "key": "uid", "value": "2022300067" }]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{ "key": "BASE_URL", "value": "http://localhost:5000" },
+		{ "key": "STUDENT_TOKEN", "value": "" },
+		{ "key": "LAB_TOKEN", "value": "" },
+		{ "key": "HOD_TOKEN", "value": "" },
+		{ "key": "PRINCIPAL_TOKEN", "value": "" },
+		{ "key": "APPLICATION_ID", "value": "" }
+	]
+}
