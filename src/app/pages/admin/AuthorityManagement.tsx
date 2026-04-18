@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useAdmin } from '../../context/AdminContext';
 import { Link } from 'react-router';
+import { useAdmin } from '../../context/AdminContext';
+import { useAuth } from '../../context/AuthContext';
 import { 
   Plus, Send, Mail, CheckCircle2, ShieldCheck, X
 } from 'lucide-react';
@@ -20,6 +21,7 @@ function Toast({ message, visible }: { message: string, visible: boolean }) {
 
 export function AuthorityManagement() {
   const { authorities, addAuthority } = useAdmin();
+  const { addUser } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
   const [showToast, setShowToast] = useState(false);
@@ -36,6 +38,22 @@ export function AuthorityManagement() {
     e.preventDefault();
     if(formData.name && formData.email && formData.password) {
       addAuthority(formData);
+      
+      // Determine correct system role and routing path
+      let role = 'lab-incharge';
+      let redirectTo = '/lab/dashboard';
+      if (formData.role === 'HOD') { role = 'hod'; redirectTo = '/hod/dashboard'; }
+      if (formData.role === 'Principal') { role = 'principal'; redirectTo = '/principal/dashboard'; }
+      
+      addUser({
+        id: `a_${Date.now()}`,
+        email: formData.email,
+        password: formData.password,
+        role: role as any,
+        name: formData.name,
+        redirectTo
+      });
+
       setModalOpen(false);
       setFormData({ name: '', email: '', role: 'Lab In-charge', department: 'Library', password: '' });
       triggerToast('Authority Account Created Successfully');

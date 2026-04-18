@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router';
 import { useLab } from '../context/LabContext';
+import { useAuth } from '../context/AuthContext';
 import { 
   Menu, X, Bell, LogOut, LayoutDashboard, 
   ClipboardList, CheckSquare, Settings, 
@@ -10,6 +11,7 @@ import { AnimatePresence, motion } from 'motion/react';
 
 export function LabLayout() {
   const { profile } = useLab();
+  const { currentUser, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -35,7 +37,10 @@ export function LabLayout() {
     { name: 'Help', path: '/lab/help', icon: HelpCircle },
   ];
 
-  const handleLogout = () => navigate('/login');
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   return (
     <div className="min-h-screen bg-[#F0F0F0] text-[#121212] font-sans flex flex-col md:flex-row">
@@ -97,12 +102,12 @@ export function LabLayout() {
             {/* Profile Footer Area */}
             <div className="p-4 border-t-4 border-[#121212] bg-[#F9F9F9]">
                <div className="flex items-center gap-3 mb-4">
-                 <div className="w-10 h-10 bg-[#1040C0] border-2 border-[#121212] text-white flex items-center justify-center font-black text-sm shrink-0">
-                   {profile.initials}
+                 <div className="w-10 h-10 bg-[#1040C0] border-2 border-[#121212] text-white flex items-center justify-center font-black text-sm shrink-0 uppercase">
+                   {currentUser?.name.split(' ').map((n: string) => n[0]).join('').substring(0,2)}
                  </div>
                  <div className="flex flex-col overflow-hidden">
-                   <span className="font-black text-xs uppercase truncate tracking-widest">{profile.name}</span>
-                   <span className="text-[10px] uppercase font-bold opacity-60 truncate tracking-widest">{profile.email}</span>
+                   <span className="font-black text-xs uppercase truncate tracking-widest">{currentUser?.name}</span>
+                   <span className="text-[10px] uppercase font-bold opacity-60 truncate tracking-widest">{currentUser?.email}</span>
                  </div>
                </div>
                <button 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router';
 import { useAdmin } from '../context/AdminContext';
+import { useAuth } from '../context/AuthContext';
 import { 
   Menu, X, Bell, LogOut, LayoutDashboard, 
   Users, UploadCloud, FileBadge, ShieldCheck, 
@@ -10,6 +11,7 @@ import { Logo } from '../components/Logo';
 import { motion, AnimatePresence } from 'motion/react';
 
 export function AdminLayout() {
+  const { currentUser, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -41,7 +43,10 @@ export function AdminLayout() {
     { name: 'Help', path: '/admin/help', icon: <HelpCircle size={20} /> },
   ];
 
-  const handleLogout = () => navigate('/');
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-white text-[#121212] overflow-y-auto w-72 border-r-4 border-[#121212]">
@@ -138,13 +143,15 @@ export function AdminLayout() {
               )}
             </button>
             
-            <div className="hidden sm:flex flex-col items-end">
-              <span className="font-black uppercase tracking-tighter text-sm leading-none">{profile.name}</span>
-              <span className="font-bold text-[10px] uppercase tracking-widest opacity-50">Root Access</span>
+            <div className="hidden md:flex flex-col items-end mr-2 text-[#121212]">
+              <span className="font-black uppercase tracking-tight text-sm leading-tight">{currentUser?.name}</span>
+              <span className="font-bold text-[10px] uppercase tracking-widest opacity-50">
+                 System Administrator
+              </span>
             </div>
             
-            <div className="w-12 h-12 bg-[#F0C020] border-2 border-[#121212] rounded-full flex items-center justify-center font-black uppercase tracking-tighter shrink-0 text-xl">
-               NA
+            <div className="w-10 h-10 bg-[#F0C020] text-[#121212] border-4 border-[#121212] flex items-center justify-center font-black text-lg uppercase shrink-0">
+               {currentUser?.name.split(' ').map((n: string) => n[0]).join('').substring(0,2)}
             </div>
           </div>
         </header>

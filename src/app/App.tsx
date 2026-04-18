@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router';
 import LandingPage from './pages/LandingPage';
 import { AuthPage } from './pages/AuthPage';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { NexusProvider } from './context/NexusContext';
 import { AuthorityProvider } from './context/AuthorityContext';
 
@@ -57,9 +58,11 @@ export default function App() {
       
       {/* Student App Route Container */}
       <Route element={
-        <NexusProvider>
-          <StudentLayout />
-        </NexusProvider>
+        <ProtectedRoute allowedRoles={['student']}>
+          <NexusProvider>
+            <StudentLayout />
+          </NexusProvider>
+        </ProtectedRoute>
       }>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/application" element={<MyApplication />} />
@@ -70,26 +73,47 @@ export default function App() {
         <Route path="/help" element={<HelpSupport />} />
       </Route>
 
-      {/* Authority Portal App Route Container */}
+      {/* HOD Portal Route Container */}
       <Route element={
-        <AuthorityProvider>
-          <AuthorityLayout />
-        </AuthorityProvider>
+        <ProtectedRoute allowedRoles={['hod']}>
+          <AuthorityProvider>
+            <AuthorityLayout />
+          </AuthorityProvider>
+        </ProtectedRoute>
       }>
-        <Route path="/authority/dashboard" element={<AuthDashboard />} />
-        <Route path="/authority/pending" element={<PendingApps />} />
-        <Route path="/authority/review/:id" element={<ReviewApp />} />
-        <Route path="/authority/reviewed" element={<ReviewedApps />} />
-        <Route path="/authority/notifications" element={<AuthNotifications />} />
-        <Route path="/authority/reports" element={<Reports />} />
-        <Route path="/authority/help" element={<AuthHelpSupport />} />
+        <Route path="/hod/dashboard" element={<AuthDashboard />} />
+        <Route path="/hod/pending" element={<PendingApps />} />
+        <Route path="/hod/review/:id" element={<ReviewApp />} />
+        <Route path="/hod/reviewed" element={<ReviewedApps />} />
+        <Route path="/hod/notifications" element={<AuthNotifications />} />
+        <Route path="/hod/reports" element={<Reports />} />
+        <Route path="/hod/help" element={<AuthHelpSupport />} />
+      </Route>
+
+      {/* Principal Portal Route Container */}
+      <Route element={
+        <ProtectedRoute allowedRoles={['principal']}>
+          <AuthorityProvider>
+            <AuthorityLayout />
+          </AuthorityProvider>
+        </ProtectedRoute>
+      }>
+        <Route path="/principal/dashboard" element={<AuthDashboard />} />
+        <Route path="/principal/pending" element={<PendingApps />} />
+        <Route path="/principal/review/:id" element={<ReviewApp />} />
+        <Route path="/principal/reviewed" element={<ReviewedApps />} />
+        <Route path="/principal/notifications" element={<AuthNotifications />} />
+        <Route path="/principal/reports" element={<Reports />} />
+        <Route path="/principal/help" element={<AuthHelpSupport />} />
       </Route>
 
       {/* Admin Portal App Route Container */}
       <Route element={
-        <AdminProvider>
-          <AdminLayout />
-        </AdminProvider>
+        <ProtectedRoute allowedRoles={['admin']}>
+          <AdminProvider>
+            <AdminLayout />
+          </AdminProvider>
+        </ProtectedRoute>
       }>
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/students" element={<StudentManagement />} />
@@ -105,9 +129,11 @@ export default function App() {
 
       {/* Lab Portal App Route Container */}
       <Route element={
-        <LabProvider>
-          <LabLayout />
-        </LabProvider>
+        <ProtectedRoute allowedRoles={['lab-incharge']}>
+          <LabProvider>
+            <LabLayout />
+          </LabProvider>
+        </ProtectedRoute>
       }>
         <Route path="/lab/dashboard" element={<LabDashboard />} />
         <Route path="/lab/pending" element={<LabPending />} />

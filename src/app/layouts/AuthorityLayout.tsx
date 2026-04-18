@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router';
 import { useAuthority } from '../context/AuthorityContext';
+import { useAuth } from '../context/AuthContext';
 import { 
   Menu, X, Bell, LogOut, LayoutDashboard, 
   Inbox, CheckSquare, FileBarChart, HelpCircle
@@ -13,6 +14,7 @@ export function AuthorityLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { profile, notifications } = useAuthority();
+  const { currentUser, logout } = useAuth();
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -36,7 +38,10 @@ export function AuthorityLayout() {
     { name: 'Help', path: '/authority/help', icon: <HelpCircle size={20} /> },
   ];
 
-  const handleLogout = () => navigate('/login');
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-[#121212] text-white overflow-y-auto w-72 border-r-4 border-[#F0C020]">
@@ -135,14 +140,14 @@ export function AuthorityLayout() {
             </button>
             
             <div className="hidden md:flex flex-col items-end mr-2">
-              <span className="font-black uppercase tracking-tight text-sm leading-tight">{profile.name}</span>
+              <span className="font-black uppercase tracking-tight text-sm leading-tight">{currentUser?.name}</span>
               <span className="font-bold text-[10px] uppercase tracking-widest opacity-60 flex items-center gap-1">
-                 <div className="w-1.5 h-1.5 rounded-full bg-[#1040C0]" /> {profile.role} • {profile.department}
+                 <div className="w-1.5 h-1.5 rounded-full bg-[#1040C0]" /> {currentUser?.role} • {profile.department}
               </span>
             </div>
             
             <div className="w-10 h-10 bg-[#121212] text-white border-2 border-[#121212] flex items-center justify-center font-black uppercase overflow-hidden shrink-0">
-               {profile.name.split(' ').map(n => n[0]).join('').substring(0,2)}
+               {currentUser?.name.split(' ').map((n: string) => n[0]).join('').substring(0,2)}
             </div>
           </div>
         </header>

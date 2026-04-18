@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router';
 import { useNexus } from '../context/NexusContext';
+import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, 
   FileText, 
@@ -18,7 +19,9 @@ import { Logo } from '../components/Logo';
 
 export function StudentLayout() {
   const { profile, notifications } = useNexus();
+  const { currentUser, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const unreadNotificationsCount = notifications.filter(n => !n.read).length;
@@ -84,10 +87,13 @@ export function StudentLayout() {
         </nav>
 
         <div className="p-4 border-t-4 border-[#121212]">
-          <Link to="/" className="flex items-center justify-center gap-2 w-full py-3 border-2 border-[#121212] hover:bg-[#F0C020] transition-colors font-bold text-sm uppercase tracking-wider">
+          <button 
+            onClick={() => { logout(); setSidebarOpen(false); navigate('/'); }}
+            className="flex items-center justify-center gap-2 w-full py-3 border-2 border-[#121212] hover:bg-[#F0C020] transition-colors font-bold text-sm uppercase tracking-wider"
+          >
             <LogOut className="w-4 h-4" strokeWidth={3} />
             Logout
-          </Link>
+          </button>
         </div>
       </aside>
 
@@ -119,11 +125,11 @@ export function StudentLayout() {
             
             <div className="flex items-center gap-3">
               <div className="hidden md:flex flex-col items-end">
-                <span className="font-bold text-sm leading-none">{profile.name}</span>
+                <span className="font-bold text-sm leading-none">{currentUser?.name}</span>
                 <span className="text-xs uppercase font-medium tracking-widest opacity-60 mt-1">{profile.rollNo}</span>
               </div>
-              <div className="w-12 h-12 bg-[#F0C020] border-4 border-[#121212] flex items-center justify-center font-black text-lg">
-                {profile.avatar}
+              <div className="w-12 h-12 bg-[#F0C020] border-4 border-[#121212] flex items-center justify-center font-black text-lg uppercase">
+                {currentUser?.name.split(' ').map((n: string) => n[0]).join('').substring(0,2)}
               </div>
             </div>
           </div>
