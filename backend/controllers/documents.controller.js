@@ -10,6 +10,7 @@
 
 const supabase = require('../db/config');
 const pipeline = require('../services/documentPipeline');
+const gemini = require('../services/geminiService');
 const path = require('path');
 const fs = require('fs');
 const storageService = require('../services/storageService');
@@ -88,24 +89,68 @@ const uploadDocument = async (req, res) => {
 
     if (docErr || !doc) throw docErr || new Error('Failed to insert document');
 
-    // 5. Create first pending verification record
+    const uploadedDocId = doc[0].id;
+
+    // 5. AUTO-VERIFICATION: Gemini AI Check
+    console.log(`[AI-Check] Triggering analysis for ${originalName}...`);
+    const aiResult = await gemini.analyzeDocument(filePath, student.name, student.roll_number);
+
+    if (aiResult.success) {
+      const { match, reason, extracted_name, extracted_id } = aiResult.analysis;
+      
+      // Update document with AI metadata
+      await supabase
+        .from('documents')
+        .update({
+          ai_verification_status: match ? 'verified' : 'mismatch',
+          ai_verification_details: aiResult.analysis
+        })
+        .eq('id', uploadedDocId);
+
+      if (!match) {
+        console.log(`[AI-Reject] Mismatch detected: ${reason}`);
+        
+        // AUTO-REJECT: Delegate to pipeline rejection
+        const SYSTEM_AI_ID = '6c1aa7ac-265d-40ea-960a-67e714f32bf6'; 
+        
+        await pipeline.processRejection(
+          uploadedDocId, 
+          SYSTEM_AI_ID, 
+          `Auto-rejected by Nexus AI: ${reason}`,
+          `Extracted: Name="${extracted_name}", ID="${extracted_id}"`
+        );
+
+        return res.status(200).json({
+          success: true,
+          status: 'Auto-Rejected',
+          message: `AI Verification Failed: ${reason}`,
+          document: doc[0]
+        });
+      }
+      console.log(`[AI-Verified] Document matches student profile.`);
+    } else {
+      console.warn(`[AI-Warning] Verification failed/skipped: ${aiResult.error}`);
+    }
+
+    // 6. Create first pending verification record (if not auto-rejected)
     await supabase.from('document_verifications').insert([{
-      document_id: doc[0].id,
+      document_id: uploadedDocId,
       stage: firstStage,
       status: 'pending'
     }]);
 
-    // 6. Notify lab-incharge
+    // 7. Notify lab-incharge
     await supabase.from('notifications').insert([{
       to_role: 'lab-incharge',
       application_id: applicationId,
-      message: `New ${docType.name} uploaded by ${student.name} (${student.roll_number}) is waiting for your verification.`,
+      message: `New ${docType.name} uploaded by ${student.name} (${student.roll_number}) is waiting for your verification. [AI Status: ${aiResult.success && aiResult.analysis.match ? 'Verified' : 'Manual Check Req'}]`,
       is_read: false
     }]);
 
     res.status(200).json({
       success: true,
       document: doc[0],
+      ai_status: aiResult.success ? aiResult.analysis : { error: aiResult.error },
       verificationPath: stages,
       currentStage: firstStage,
       totalStages: stages.length,
