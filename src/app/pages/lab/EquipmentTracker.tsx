@@ -47,6 +47,39 @@ export function EquipmentTracker() {
   };
 
   const handleExport = () => {
+    // Build CSV from current labStudents data
+    const headers = ['Roll No', 'Name', 'Branch', 'Lab Manual', 'Equip Kit', 'Safety Deposit', 'Lab Card', 'Overall Status', 'Submitted At'];
+    
+    const rows = labStudents.map(s => {
+      const allClear =
+        s.equipment.labManual === 'Returned' &&
+        s.equipment.equipmentKit === 'Returned' &&
+        s.equipment.safetyDeposit === 'Returned' &&
+        s.equipment.labCard === 'Returned';
+      return [
+        s.rollNo,
+        `"${s.name}"`,
+        s.branch || '',
+        s.equipment.labManual,
+        s.equipment.equipmentKit,
+        s.equipment.safetyDeposit,
+        s.equipment.labCard,
+        allClear ? 'All Clear' : 'Items Pending',
+        s.submittedAt ? new Date(s.submittedAt).toLocaleDateString('en-IN') : '',
+      ].join(',');
+    });
+
+    const csvContent = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `lab-equipment-tracker-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
     setToastMsg('Export prepared. Downloading CSV...');
     setTimeout(() => setToastMsg(''), 3000);
   };
