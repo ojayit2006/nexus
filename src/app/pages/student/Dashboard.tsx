@@ -158,7 +158,7 @@ export function Dashboard() {
           <div>
             <h2 className="font-black text-2xl uppercase mb-6 tracking-tight flex items-center gap-2">
               <span className="w-4 h-4 bg-[#D02020] inline-block border-2 border-[#121212]" />
-              Status Heatmap
+              Current Status
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {departments.map((dept) => (
