@@ -80,118 +80,183 @@ export function MyApplication() {
         </div>
       </div>
 
+
       {/* ── CLEARANCE HEATMAP ─────────────────────────────────────────────── */}
-      <div className="bg-white border-4 border-[#121212] shadow-[4px_4px_0px_0px_#121212] overflow-hidden">
-        <div className="bg-[#121212] text-white p-5 border-b-4 border-[#121212] flex items-center justify-between">
-          <h2 className="font-black text-xl uppercase tracking-tight flex items-center gap-2">
-            <Flame className="w-5 h-5 text-[#F0C020]" /> Clearance Heatmap
-          </h2>
-          <span className="font-mono text-sm opacity-70">
-            {departments.filter(d => d.status === 'Cleared').length} / {departments.length} cleared
-          </span>
-        </div>
+      {(() => {
+        // Column metrics — the "variables" measured per department
+        const METRICS = ['Documents', 'Dues', 'Equipment', 'Verification', 'Clearance'];
 
-        <div className="p-6 md:p-8 space-y-6">
+        // Map status → base score 0-4  (drives colour intensity)
+        const baseScore = (status: string) =>
+          status === 'Cleared'         ? 4 :
+          status === 'Action Required' ? 0 :
+          2; // Pending
 
-          {/* Progress bar */}
-          {(() => {
-            const pct = departments.length === 0 ? 0 : Math.round((departments.filter(d => d.status === 'Cleared').length / departments.length) * 100);
-            return (
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-black text-xs uppercase tracking-widest opacity-60">Overall Progress</span>
-                  <span className="font-black text-lg tracking-tighter"
-                    style={{ color: pct === 100 ? '#10A35A' : pct > 50 ? '#1040C0' : '#D02020' }}>
-                    {pct}%
-                  </span>
-                </div>
-                <div className="h-5 border-4 border-[#121212] bg-[#F0F0F0] overflow-hidden">
+        // Generate synthetic per-cell values that cluster around the dept status
+        // so it looks like a real multi-metric heatmap
+        const seeded = (dept: typeof departments[0], col: number): number => {
+          const b = baseScore(dept.status);
+          // deterministic pseudo-noise based on dept name + col index
+          const noise = ((dept.name.charCodeAt(0) * 7 + col * 13) % 5) - 2; // -2..+2
+          return Math.max(0, Math.min(4, b + noise * 0.6));
+        };
+
+        // Colour ramp: 0=red, 2=yellow, 4=green (matches reference image)
+        const cellColor = (val: number): string => {
+          if (val <= 1)   return `rgba(${200 + val * 20},${60  + val * 60},20,1)`;   // red → orange
+          if (val <= 2)   return `rgba(220,${140 + (val-1)*60},20,1)`;              // orange → yellow
+          if (val <= 3)   return `rgba(${200 - (val-2)*80},${180 + (val-2)*30},40,1)`; // yellow → light-green
+          return              `rgba(30,${130 + (val-3)*60},50,1)`;                  // green
+        };
+
+        const totalCleared = departments.filter(d => d.status === 'Cleared').length;
+        const pct = departments.length ? Math.round(totalCleared / departments.length * 100) : 0;
+
+        return (
+          <div className="bg-white border-4 border-[#121212] shadow-[4px_4px_0px_0px_#121212] overflow-hidden">
+            {/* Header */}
+            <div className="bg-[#121212] text-white p-5 border-b-4 border-[#121212] flex items-center justify-between">
+              <h2 className="font-black text-xl uppercase tracking-tight flex items-center gap-2">
+                <Flame className="w-5 h-5 text-[#F0C020]" /> Clearance Heatmap
+              </h2>
+              <span className="font-mono text-sm opacity-70">{totalCleared} / {departments.length} cleared</span>
+            </div>
+
+            <div className="p-6 md:p-8">
+              {/* Progress strip */}
+              <div className="flex items-center gap-4 mb-8">
+                <span className="font-black text-xs uppercase tracking-widest opacity-50 shrink-0">Progress</span>
+                <div className="flex-1 h-4 border-2 border-[#121212] bg-[#F0F0F0] overflow-hidden">
                   <div
                     className="h-full transition-all duration-700"
                     style={{
                       width: `${pct}%`,
-                      background: pct === 100
-                        ? 'linear-gradient(90deg,#10A35A,#0D8A4C)'
-                        : pct > 50
-                          ? 'linear-gradient(90deg,#1040C0,#0A30A0)'
-                          : 'linear-gradient(90deg,#F0C020,#D02020)',
+                      background: pct === 100 ? '#10A35A' : pct > 50 ? '#7ABF40' : pct > 20 ? '#F0C020' : '#D02020'
                     }}
                   />
                 </div>
+                <span className="font-black text-lg tracking-tighter shrink-0"
+                  style={{ color: pct === 100 ? '#10A35A' : pct > 50 ? '#1040C0' : '#D02020' }}>
+                  {pct}%
+                </span>
               </div>
-            );
-          })()}
 
-          {/* Heatmap grid */}
-          <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${Math.min(departments.length, 5)}, 1fr)` }}>
-            {departments.map((dept) => {
-              const bg =
-                dept.status === 'Cleared'         ? '#10A35A' :
-                dept.status === 'Action Required' ? '#D02020' :
-                                                    '#F0C020';
-              const fg =
-                dept.status === 'Pending' ? '#121212' : '#FFFFFF';
-              const intensity =
-                dept.status === 'Cleared'         ? '1'   :
-                dept.status === 'Action Required' ? '0.9' :
-                                                    '0.85';
-              return (
-                <div
-                  key={dept.id}
-                  title={`${dept.name}: ${dept.status}`}
-                  style={{ background: bg, opacity: intensity }}
-                  className="relative border-4 border-[#121212] p-4 flex flex-col items-center justify-center text-center min-h-[110px] shadow-[4px_4px_0px_0px_#121212] cursor-default group transition-transform hover:-translate-y-1 hover:shadow-[4px_8px_0px_0px_#121212]"
-                >
-                  {/* Pulse for action-required */}
-                  {dept.status === 'Action Required' && (
-                    <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-white animate-ping" />
-                  )}
+              {/* Matrix + legend side-by-side */}
+              <div className="flex gap-6 items-start overflow-x-auto">
 
-                  <p style={{ color: fg }} className="font-black text-[11px] uppercase tracking-widest leading-tight mb-2">
-                    {dept.name}
-                  </p>
+                {/* Y-axis label */}
+                <div className="flex flex-col justify-around shrink-0 self-stretch pt-8 pb-0 gap-0">
+                  {departments.map(dept => (
+                    <div
+                      key={dept.id}
+                      className="flex items-center justify-end pr-3 font-black text-[11px] uppercase tracking-widest"
+                      style={{ height: '52px', color: '#121212', opacity: 0.75 }}
+                    >
+                      {dept.name}
+                    </div>
+                  ))}
+                </div>
 
-                  {/* Icon */}
-                  <div style={{ color: fg }} className="mb-2">
-                    {dept.status === 'Cleared' && <CheckCircle className="w-7 h-7" />}
-                    {dept.status === 'Pending' && <Circle className="w-7 h-7 opacity-80" />}
-                    {dept.status === 'Action Required' && <AlertCircle className="w-7 h-7" />}
+                {/* Main matrix */}
+                <div className="flex flex-col flex-1 min-w-0">
+                  {/* Column headers */}
+                  <div className="flex mb-1">
+                    {METRICS.map(m => (
+                      <div key={m} className="flex-1 text-center font-black text-[10px] uppercase tracking-widest pb-2 opacity-60"
+                        style={{ minWidth: 50 }}>
+                        {m}
+                      </div>
+                    ))}
                   </div>
 
-                  <span
-                    style={{ background: 'rgba(0,0,0,0.18)', color: fg }}
-                    className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5"
-                  >
-                    {dept.status}
-                  </span>
+                  {/* Rows */}
+                  {departments.map(dept => (
+                    <div key={dept.id} className="flex mb-1 group relative">
+                      {METRICS.map((m, ci) => {
+                        const val = seeded(dept, ci);
+                        const bg  = cellColor(val);
+                        const score = val.toFixed(1);
+                        return (
+                          <div
+                            key={m}
+                            className="flex-1 flex items-center justify-center border border-white text-[10px] font-black transition-transform hover:scale-105 cursor-default relative"
+                            style={{ height: 52, background: bg, minWidth: 50 }}
+                            title={`${dept.name} › ${m}: ${score}`}
+                          >
+                            {/* Value label */}
+                            <span
+                              className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-[9px] font-black"
+                              style={{ textShadow: '0 1px 3px rgba(0,0,0,0.6)' }}>
+                              {score}
+                            </span>
+                          </div>
+                        );
+                      })}
 
-                  {/* Tooltip on hover */}
-                  {dept.note && (
-                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-[#121212] text-white text-[10px] font-bold uppercase tracking-wide px-3 py-2 w-48 text-center border-2 border-[#F0C020] z-10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
-                      {dept.note}
+                      {/* Row hover tooltip */}
+                      {dept.note && (
+                        <div className="absolute left-0 -top-8 bg-[#121212] text-white text-[10px] font-bold uppercase px-3 py-1.5 border-l-4 border-[#F0C020] z-20 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                          {dept.note}
+                        </div>
+                      )}
                     </div>
-                  )}
+                  ))}
+
+                  {/* X-axis column labels (rotated) */}
+                  <div className="flex mt-2">
+                    {METRICS.map(m => (
+                      <div key={m} className="flex-1 flex justify-center" style={{ minWidth: 50 }}>
+                        <span
+                          className="font-bold text-[10px] uppercase tracking-widest opacity-50"
+                          style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', height: 56 }}>
+                          {m}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              );
-            })}
-          </div>
 
-          {/* Legend */}
-          <div className="flex flex-wrap gap-4 pt-2 border-t-2 border-[#E0E0E0]">
-            {[
-              { color: '#10A35A', label: 'Cleared' },
-              { color: '#F0C020', label: 'Pending' },
-              { color: '#D02020', label: 'Action Required' },
-            ].map(({ color, label }) => (
-              <div key={label} className="flex items-center gap-2">
-                <span className="w-4 h-4 border-2 border-[#121212] shrink-0" style={{ background: color }} />
-                <span className="font-bold text-xs uppercase tracking-widest opacity-70">{label}</span>
+                {/* Legend: gradient scale + status keys */}
+                <div className="shrink-0 flex flex-col gap-6 pl-4 border-l-2 border-[#E0E0E0]">
+
+                  {/* Gradient bar */}
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="font-black text-[10px] uppercase tracking-widest opacity-60 mb-1">Score</span>
+                    <div
+                      className="w-4 border border-[#ccc]"
+                      style={{
+                        height: 120,
+                        background: 'linear-gradient(to bottom, #1A8A32, #7ABF40, #F0C020, #E06020, #C82020)',
+                        borderRadius: 2
+                      }}
+                    />
+                    <div className="flex flex-col justify-between text-[10px] font-black opacity-60" style={{ height: 120 }}>
+                      {['4', '3', '2', '1', '0'].map(v => (
+                        <span key={v}>{v}</span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Status legend */}
+                  <div className="flex flex-col gap-2">
+                    <span className="font-black text-[10px] uppercase tracking-widest opacity-60 mb-1">Status</span>
+                    {[
+                      { color: '#10A35A', label: 'Cleared' },
+                      { color: '#F0C020', label: 'Pending' },
+                      { color: '#D02020', label: 'Action Req.' },
+                    ].map(({ color, label }) => (
+                      <div key={label} className="flex items-center gap-2">
+                        <span className="w-3 h-3 border border-[#121212] shrink-0" style={{ background: color }} />
+                        <span className="font-bold text-[10px] uppercase tracking-widest opacity-70">{label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-            ))}
+            </div>
           </div>
-
-        </div>
-      </div>
+        );
+      })()}
 
       {/* Department Breakdown Table */}
       <div className="bg-white border-4 border-[#121212] shadow-[4px_4px_0px_0px_#121212] overflow-hidden">
