@@ -136,10 +136,18 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     fetchSyncData();
   };
 
-  const addCsvUpload = async ({ file, department }: any) => {
-    const token = localStorage.getItem('nexus_token');
-    await axios.post('/api/admin/csv/upload', { department, filename: file?.name || 'dues_batch.csv' }, { headers: { Authorization: `Bearer ${token}` }});
-    fetchSyncData();
+  // addCsvUpload: called by CsvUpload.tsx AFTER the real upload already succeeded.
+  // Just update local history state — no backend call needed here.
+  const addCsvUpload = async ({ filename, department, rows, flagged: flaggedCount }: any) => {
+    const entry: CsvHistory = {
+      id: Date.now().toString(),
+      timestamp: new Date().toISOString(),
+      filename: filename || 'dues_batch.csv',
+      department,
+      rows: rows ?? 0,
+      flagged: flaggedCount ?? 0,
+    };
+    setCsvHistory(prev => [entry, ...prev]);
   };
 
   return (
