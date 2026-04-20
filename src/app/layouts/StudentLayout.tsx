@@ -129,7 +129,7 @@ export function StudentLayout() {
                 <span className="text-xs uppercase font-medium tracking-widest opacity-60 mt-1">{profile.rollNo}</span>
               </div>
               <div className="w-12 h-12 bg-[#F0C020] border-4 border-[#121212] flex items-center justify-center font-black text-lg uppercase">
-                {currentUser?.name.split(' ').map((n: string) => n[0]).join('').substring(0,2)}
+                {currentUser?.name ? currentUser.name.split(' ').map((n: string) => n[0]).join('').substring(0,2) : '??'}
               </div>
             </div>
           </div>

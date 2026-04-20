@@ -1,4 +1,5 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const { createClient } = require('@supabase/supabase-js');
 
 // We use the REST API bindings instead of raw Postgres TCP pools to prevent host mapping failures natively on Windows.

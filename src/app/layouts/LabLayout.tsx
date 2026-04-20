@@ -103,7 +103,7 @@ export function LabLayout() {
             <div className="p-4 border-t-4 border-[#121212] bg-[#F9F9F9]">
                <div className="flex items-center gap-3 mb-4">
                  <div className="w-10 h-10 bg-[#1040C0] border-2 border-[#121212] text-white flex items-center justify-center font-black text-sm shrink-0 uppercase">
-                   {currentUser?.name.split(' ').map((n: string) => n[0]).join('').substring(0,2)}
+                   {currentUser?.name ? currentUser.name.split(' ').map((n: string) => n[0]).join('').substring(0,2) : '??'}
                  </div>
                  <div className="flex flex-col overflow-hidden">
                    <span className="font-black text-xs uppercase truncate tracking-widest">{currentUser?.name}</span>

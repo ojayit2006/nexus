@@ -151,7 +151,7 @@ export function AdminLayout() {
             </div>
             
             <div className="w-10 h-10 bg-[#F0C020] text-[#121212] border-4 border-[#121212] flex items-center justify-center font-black text-lg uppercase shrink-0">
-               {currentUser?.name.split(' ').map((n: string) => n[0]).join('').substring(0,2)}
+               {currentUser?.name ? currentUser.name.split(' ').map((n: string) => n[0]).join('').substring(0,2) : '??'}
             </div>
           </div>
         </header>

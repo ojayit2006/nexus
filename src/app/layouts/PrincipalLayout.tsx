@@ -148,7 +148,7 @@ export function PrincipalLayout() {
             </div>
             
             <div className="w-10 h-10 bg-[#121212] text-white border-2 border-[#121212] flex items-center justify-center font-black uppercase overflow-hidden shrink-0">
-               {currentUser?.name.split(' ').map((n: string) => n[0]).join('').substring(0,2)}
+               {currentUser?.name ? currentUser.name.split(' ').map((n: string) => n[0]).join('').substring(0,2) : '??'}
             </div>
           </div>
         </header>

@@ -111,7 +111,7 @@ export function Dashboard() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="font-black text-3xl md:text-5xl tracking-tight mb-2 uppercase">
-            Welcome back, {profile.name.split(' ')[0]} 👋
+            Welcome back, {profile.name ? profile.name.split(' ')[0] : 'Student'} 👋
           </h1>
           <p className="text-lg font-medium opacity-80">
             {format(new Date(), 'EEEE, MMMM do, yyyy')} • Your graduation clearance is in progress.

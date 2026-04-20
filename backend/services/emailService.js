@@ -33,7 +33,7 @@ async function sendNudgeEmail(toEmail, subject, data) {
       <p style="font-size: 16px;">Hello,</p>
       <p style="font-size: 16px;">You currently have <strong>${data.pendingCount}</strong> applications awaiting your review that have been stalling for over 2 days.</p>
       <p style="font-size: 16px;">Please log in to the Nexus system at your earliest convenience to process them and prevent delays in student clearance.</p>
-      <a href="http://localhost:5173/login" style="display: inline-block; background: #D02020; color: white; padding: 12px 24px; text-decoration: none; font-weight: bold; text-transform: uppercase; margin-top: 20px; border: 2px solid #121212;">Log In to Nexus</a>
+      <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/login" style="display: inline-block; background: #D02020; color: white; padding: 12px 24px; text-decoration: none; font-weight: bold; text-transform: uppercase; margin-top: 20px; border: 2px solid #121212;">Log In to Nexus</a>
     `);
 
     await transporter.sendMail({
@@ -80,7 +80,7 @@ async function sendCertificateReadyEmail(toEmail, certId) {
       <p style="font-size: 16px;">Congratulations! Your graduation clearance is fully complete.</p>
       <p style="font-size: 16px;">Your No-Dues Certificate has been generated and is ready to download.</p>
       <p style="font-size: 16px;"><strong>Certificate ID:</strong> <span style="font-family: monospace;">${certId}</span></p>
-      <a href="http://localhost:5173/locker" style="display: inline-block; background: #F0C020; color: #121212; padding: 12px 24px; text-decoration: none; font-weight: bold; text-transform: uppercase; margin-top: 20px; border: 2px solid #121212;">Open Digital Locker</a>
+      <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/locker" style="display: inline-block; background: #F0C020; color: #121212; padding: 12px 24px; text-decoration: none; font-weight: bold; text-transform: uppercase; margin-top: 20px; border: 2px solid #121212;">Open Digital Locker</a>
     `);
 
     await transporter.sendMail({

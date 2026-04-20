@@ -42,7 +42,7 @@ export function Dashboard() {
       {/* Welcome Strip */}
       <div className="flex flex-col gap-2 border-b-4 border-[#121212] pb-6">
         <div className="flex flex-wrap items-center gap-4">
-          <h1 className="font-black text-3xl md:text-5xl uppercase tracking-tighter">Welcome back, {profile.name.split(' ')[0]}</h1>
+          <h1 className="font-black text-3xl md:text-5xl uppercase tracking-tighter">Welcome back, {profile.name ? profile.name.split(' ')[0] : 'Admin'}</h1>
           <span className="font-bold text-xs uppercase tracking-widest bg-[#121212] text-white px-3 py-1.5">{format(new Date(), 'MMM dd, yyyy')}</span>
         </div>
         <p className="font-black opacity-40 uppercase tracking-widest text-sm">System overview for today.</p>

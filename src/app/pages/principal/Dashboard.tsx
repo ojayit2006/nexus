@@ -25,7 +25,7 @@ export function Dashboard() {
       <div className="bg-[#121212] text-white p-6 md:p-8 flex items-center justify-between border-b-8 border-[#1040C0]">
         <div>
            <p className="font-bold text-xs uppercase tracking-widest opacity-70 mb-2">{format(new Date(), 'EEEE, MMMM d, yyyy')}</p>
-           <h2 className="font-black text-3xl md:text-4xl uppercase tracking-tight">Welcome back, {profile.name.split(' ')[1] || profile.name} 👋</h2>
+           <h2 className="font-black text-3xl md:text-4xl uppercase tracking-tight">Welcome back, {profile.name.split(' ').length > 1 ? profile.name.split(' ')[1] : profile.name} 👋</h2>
            <p className="font-medium text-lg opacity-90 mt-2">You have <span className="font-black text-[#F0C020]">{totalPending}</span> applications waiting for review.</p>
         </div>
       </div>
@@ -49,34 +49,38 @@ export function Dashboard() {
              </Link>
           </div>
 
-          <div className="space-y-4">
-             {pendingApps.slice(0, 5).map((app) => {
-               const isStale = app.daysWaiting >= 2;
-               return (
-                 <div key={app.id} className={`bg-white border-2 hover:border-[#121212] transition-colors p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm ${
-                   isStale ? 'border-l-8 border-l-[#D02020] border-[#D02020]/20 bg-[#D02020]/5' : 'border-[#121212]'
-                 }`}>
-                   <div className="flex-1 flex flex-col">
-                     <div className="flex items-center gap-3 mb-1">
-                        <span className="font-black text-lg uppercase tracking-tight leading-none">{app.studentName}</span>
-                        {isStale && <span className="px-2 py-0.5 bg-[#D02020] text-white text-[10px] font-bold uppercase tracking-widest" title="An automated email nudge has been sent to you.">Overdue</span>}
-                     </div>
-                     <p className="font-bold text-xs uppercase tracking-widest opacity-60 mb-2">{app.rollNo} • {app.branch} '{app.batch.substring(2)}</p>
-                     <p className={`text-xs font-semibold ${isStale ? 'text-[#D02020]' : 'text-gray-500'}`}>
-                        Submitted: {format(new Date(app.submissionDate), 'MMM d')} <span className="opacity-50">({app.daysWaiting} days ago)</span>
-                     </p>
-                   </div>
-                   
-                   <Link 
-                     to={`${basePath}/review/${app.id}`}
-                     className="shrink-0 px-6 py-3 bg-[#121212] text-white font-black uppercase text-xs tracking-widest text-center hover:bg-[#1040C0] transition-colors flex items-center justify-center gap-2"
-                   >
-                     Review <ChevronRight className="w-4 h-4" />
-                   </Link>
-                 </div>
-               );
-             })}
-          </div>
+              {pendingApps.length === 0 ? (
+                <div className="bg-white border-4 border-dashed border-[#121212] p-10 flex items-center justify-center opacity-40">
+                  <p className="font-black uppercase tracking-widest">No applications waiting in queue.</p>
+                </div>
+              ) : (
+                pendingApps.slice(0, 5).map((app) => {
+                  const isStale = app.daysWaiting >= 2;
+                  return (
+                    <div key={app.id} className={`bg-white border-2 hover:border-[#121212] transition-colors p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm ${
+                      isStale ? 'border-l-8 border-l-[#D02020] border-[#D02020]/20 bg-[#D02020]/5' : 'border-[#121212]'
+                    }`}>
+                      <div className="flex-1 flex flex-col">
+                        <div className="flex items-center gap-3 mb-1">
+                           <span className="font-black text-lg uppercase tracking-tight leading-none">{app.studentName}</span>
+                           {isStale && <span className="px-2 py-0.5 bg-[#D02020] text-white text-[10px] font-bold uppercase tracking-widest" title="An automated email nudge has been sent to you.">Overdue</span>}
+                        </div>
+                        <p className="font-bold text-xs uppercase tracking-widest opacity-60 mb-2">{app.rollNo} • {app.branch} '{app.batch.substring(2)}</p>
+                        <p className={`text-xs font-semibold ${isStale ? 'text-[#D02020]' : 'text-gray-500'}`}>
+                           Submitted: {format(new Date(app.submissionDate), 'MMM d')} <span className="opacity-50">({app.daysWaiting} days ago)</span>
+                        </p>
+                      </div>
+                      
+                      <Link 
+                        to={`${basePath}/review/${app.id}`}
+                        className="shrink-0 px-6 py-3 bg-[#121212] text-white font-black uppercase text-xs tracking-widest text-center hover:bg-[#1040C0] transition-colors flex items-center justify-center gap-2"
+                      >
+                        Review <ChevronRight className="w-4 h-4" />
+                      </Link>
+                    </div>
+                  );
+                })
+              )}
         </div>
 
         {/* Sidebar Column */}

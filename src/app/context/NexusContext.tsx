@@ -171,7 +171,7 @@ export function NexusProvider({ children }: { children: ReactNode }) {
             type: payload.type || 'system',
             title: payload.title || 'Notification',
             description: payload.description || n.message || '',
-            time: new Date(n.created_at).toLocaleDateString(),
+            time: n.created_at ? new Date(n.created_at).toLocaleDateString() : 'Just now',
             read: n.is_read
           };
         })

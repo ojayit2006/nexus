@@ -20,7 +20,7 @@ interface CertRecord {
 }
 
 export function DigitalLocker() {
-  const { profile, departments } = useNexus();
+  const { profile, departments, loading } = useNexus();
   const { currentUser } = useAuth();
   
   const [lockerData, setLockerData] = useState<{
@@ -188,6 +188,15 @@ export function DigitalLocker() {
   const usedMB = lockerData
     ? ((lockerData.documents.length * 0.8) + (lockerData.payments.length * 0.3) + (lockerData.certificate ? 1.2 : 0)).toFixed(1)
     : '0';
+
+  if (loading && !lockerData) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center p-10 space-y-6">
+        <div className="w-16 h-16 border-8 border-transparent border-t-[#121212] border-r-[#F0C020] rounded-full animate-spin" />
+        <p className="font-black uppercase tracking-widest text-[#121212] animate-pulse">Syncing Vault Data...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 md:p-10 max-w-7xl mx-auto space-y-10">

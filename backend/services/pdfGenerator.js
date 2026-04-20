@@ -43,7 +43,7 @@ async function generateCertificateId(prefix = 'NX-DOC') {
 
 async function generateQRCode(certificateId) {
   // Public URL — scanning opens the PDF directly, no login required
-  const pdfUrl = `${process.env.CERT_PUBLIC_BASE_URL || 'http://localhost:5000'}/api/certificates/pdf/${certificateId}`;
+  const pdfUrl = `${process.env.BACKEND_URL || process.env.CERT_PUBLIC_BASE_URL || 'http://localhost:5000'}/api/certificates/pdf/${certificateId}`;
   const qrBuffer = await QRCode.toBuffer(pdfUrl, { width: 120, margin: 1, color: { dark: '#121212', light: '#FFFFFF' } });
 
   const certDir = ensureCertDir();
@@ -176,7 +176,7 @@ async function generateNoDuesCertificate(studentData, certificateId, qrBuffer) {
   // ── Footer ───────────────────────────────────────────────────────────────────
   page.drawRectangle({ x: 0, y: 0, width, height: 50, color: black });
   page.drawRectangle({ x: 0, y: 50, width, height: 3, color: yellow });
-  const publicPdfUrl = `${process.env.CERT_PUBLIC_BASE_URL || 'http://localhost:5000'}/api/certificates/pdf/${certificateId}`;
+  const publicPdfUrl = `${process.env.BACKEND_URL || process.env.CERT_PUBLIC_BASE_URL || 'http://localhost:5000'}/api/certificates/pdf/${certificateId}`;
   const urlLabel = `Scan QR or visit: ${publicPdfUrl}`;
   const urlWidth = fontRegular.widthOfTextAtSize(urlLabel, 7);
   page.drawText(urlLabel, {
